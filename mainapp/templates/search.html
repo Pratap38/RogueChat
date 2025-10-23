@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="{% static 'search.css' %}">
+
+  <title>Search User</title>
+  
+</head>
+<body>
+  <div class="container">
+    <h1>Search User</h1>
+
+    <form method="get" action="{% url 'search' %}" class="search-form">
+      <input
+        type="text"
+        name="q"
+        placeholder="Enter username"
+        value="{{ query }}"
+      />
+      <button type="submit">Search</button>
+    </form>
+
+    {% if query %}
+      {% if profile %}
+        <div class="profile-card">
+          <img
+            src="{{ profile.profile_pic.url }}"
+            alt="{{ profile.full_name }}"
+          />
+          <h2>{{ profile.full_name }}</h2>
+          <p>{{ profile.bio }}</p>
+          <p>Username: {{ profile.user.username }}</p>
+          <p>Phone: {{ profile.phone }}</p>
+          <p>Email: {{ profile.email }}</p>
+        </div>
+
+        <h3>Posts by {{ profile.user.username }}</h3>
+        <div class="posts">
+          {% if posts %}
+            {% for post in posts %}
+              <div class="post-card">
+                {% if post.image %}
+                  <img src="{{ post.image.url }}" alt="Post Image" />
+                {% endif %}
+                {% if post.video %}
+                  <video controls>
+                    <source
+                      src="{{ post.video.url }}"
+                      type="video/mp4"
+                    />
+                  </video>
+                {% endif %}
+                <p>{{ post.description }}</p>
+                <small>{{ post.timestamp }}</small>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p>No posts yet.</p>
+          {% endif %}
+        </div>
+      {% else %}
+        <p class="not-found">No user found with username "{{ query }}".</p>
+      {% endif %}
+    {% endif %}
+  </div>
+</body>
+</html>
