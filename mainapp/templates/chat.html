@@ -50,38 +50,36 @@
         </div>
     </div>
 <script>
-  // ==================== CHAT FUNCTIONALITY ====================
-  let username = "{{ request.user.username|default_if_none:'' }}";
-  username = username || localStorage.getItem('guestName') || "Anonymous";
+  // ==================== DETERMINE USERNAME ====================
+  let finalUsername = "{{ request.user.username }}";
+  const guestName = localStorage.getItem('guestName');
+  if (!finalUsername && guestName) finalUsername = guestName;
+  if (!finalUsername) finalUsername = "Anonymous";
 
+  // ==================== CHAT FUNCTIONALITY ====================
   const messagesDiv = document.getElementById('messages');
   const messageInput = document.getElementById('messageInput');
   const sendBtn = document.getElementById('sendBtn');
 
-  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-  const chatSocket = new WebSocket(`${protocol}://${window.location.host}/ws/chat/`);
+  const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+  const chatSocket = new WebSocket(wsScheme + '://' + window.location.host + '/ws/chat/');
 
   chatSocket.onmessage = function(e) {
       const data = JSON.parse(e.data);
       const msgEl = document.createElement('div');
-      msgEl.className = 'message ' + (data.username === username ? 'self' : 'other');
+      msgEl.className = 'message ' + (data.username === finalUsername ? 'self' : 'other');
       msgEl.innerHTML = `<b>${data.username}</b> ${data.message}`;
       messagesDiv.appendChild(msgEl);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
   };
 
-  chatSocket.onopen = function() {
-      console.log("Connected to WebSocket");
-  };
-
-  chatSocket.onerror = function(e) {
-      console.error("WebSocket error:", e);
-  };
-
   sendBtn.onclick = function() {
       const message = messageInput.value.trim();
       if (message) {
-          chatSocket.send(JSON.stringify({'message': message}));
+          chatSocket.send(JSON.stringify({
+              'message': message,
+              'username': finalUsername
+          }));
           messageInput.value = '';
       }
   };
@@ -95,7 +93,6 @@
   const body = document.body;
   const savedMode = localStorage.getItem('zchat-mode');
   if (savedMode === 'dark') body.classList.add('dark');
-
   toggleBtn.onclick = () => {
     body.classList.toggle('dark');
     localStorage.setItem('zchat-mode', body.classList.contains('dark') ? 'dark' : 'light');
@@ -104,7 +101,7 @@
       : '<i class="bi bi-moon"></i>';
   };
 
-  // ==================== NON‑LOGGED USER PROMPT ====================
+  // ==================== GUEST USER PROMPT ====================
   const enterBtn = document.getElementById('enterChatBtn');
   if (enterBtn) {
     enterBtn.onclick = () => {
@@ -116,6 +113,5 @@
     };
   }
 </script>
-
 </body>
 </html>
