@@ -49,63 +49,73 @@
           <button id="sendBtn"><i class="bi bi-send"></i></button>
         </div>
     </div>
+<script>
+  // ==================== CHAT FUNCTIONALITY ====================
+  let username = "{{ request.user.username|default_if_none:'' }}";
+  username = username || localStorage.getItem('guestName') || "Anonymous";
 
-    <!-- ============== SCRIPTS ============== -->
-    <script>
-      // ==================== CHAT FUNCTIONALITY ====================
-      const username = "{{ request.user.username }}" || "Anonymous";
-      const messagesDiv = document.getElementById('messages');
-      const messageInput = document.getElementById('messageInput');
-      const sendBtn = document.getElementById('sendBtn');
+  const messagesDiv = document.getElementById('messages');
+  const messageInput = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendBtn');
 
-      const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
+  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+  const chatSocket = new WebSocket(`${protocol}://${window.location.host}/ws/chat/`);
 
-      chatSocket.onmessage = function(e) {
-          const data = JSON.parse(e.data);
-          const msgEl = document.createElement('div');
-          msgEl.className = 'message ' + (data.username === username ? 'self' : 'other');
-          msgEl.innerHTML = `<b>${data.username}</b> ${data.message}`;
-          messagesDiv.appendChild(msgEl);
-          messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      };
+  chatSocket.onmessage = function(e) {
+      const data = JSON.parse(e.data);
+      const msgEl = document.createElement('div');
+      msgEl.className = 'message ' + (data.username === username ? 'self' : 'other');
+      msgEl.innerHTML = `<b>${data.username}</b> ${data.message}`;
+      messagesDiv.appendChild(msgEl);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  };
 
-      sendBtn.onclick = function() {
-          const message = messageInput.value.trim();
-          if (message) {
-              chatSocket.send(JSON.stringify({'username': username, 'message': message}));
-              messageInput.value = '';
-          }
-      };
+  chatSocket.onopen = function() {
+      console.log("Connected to WebSocket");
+  };
 
-      messageInput.addEventListener("keyup", function(e) {
-          if (e.key === "Enter") sendBtn.click();
-      });
+  chatSocket.onerror = function(e) {
+      console.error("WebSocket error:", e);
+  };
 
-      // ==================== MODE TOGGLE ====================
-      const toggleBtn = document.getElementById('modeToggle');
-      const body = document.body;
-      const savedMode = localStorage.getItem('zchat-mode');
-      if (savedMode === 'dark') body.classList.add('dark');
-
-      toggleBtn.onclick = () => {
-        body.classList.toggle('dark');
-        localStorage.setItem('zchat-mode', body.classList.contains('dark') ? 'dark' : 'light');
-        toggleBtn.innerHTML = body.classList.contains('dark')
-          ? '<i class="bi bi-sun"></i>'
-          : '<i class="bi bi-moon"></i>';
-      };
-
-      // ==================== NON‑LOGGED USER PROMPT ====================
-      const enterBtn = document.getElementById('enterChatBtn');
-      if (enterBtn) {
-        enterBtn.onclick = () => {
-          const name = document.getElementById('usernameInput').value.trim();
-          if (name) {
-            localStorage.setItem('guestName', name);
-            window.location.reload();
-          }
-        };
+  sendBtn.onclick = function() {
+      const message = messageInput.value.trim();
+      if (message) {
+          chatSocket.send(JSON.stringify({'message': message}));
+          messageInput.value = '';
       }
-    </script>
+  };
+
+  messageInput.addEventListener("keyup", function(e) {
+      if (e.key === "Enter") sendBtn.click();
+  });
+
+  // ==================== MODE TOGGLE ====================
+  const toggleBtn = document.getElementById('modeToggle');
+  const body = document.body;
+  const savedMode = localStorage.getItem('zchat-mode');
+  if (savedMode === 'dark') body.classList.add('dark');
+
+  toggleBtn.onclick = () => {
+    body.classList.toggle('dark');
+    localStorage.setItem('zchat-mode', body.classList.contains('dark') ? 'dark' : 'light');
+    toggleBtn.innerHTML = body.classList.contains('dark')
+      ? '<i class="bi bi-sun"></i>'
+      : '<i class="bi bi-moon"></i>';
+  };
+
+  // ==================== NON‑LOGGED USER PROMPT ====================
+  const enterBtn = document.getElementById('enterChatBtn');
+  if (enterBtn) {
+    enterBtn.onclick = () => {
+      const name = document.getElementById('usernameInput').value.trim();
+      if (name) {
+        localStorage.setItem('guestName', name);
+        window.location.reload();
+      }
+    };
+  }
+</script>
+
 </body>
 </html>
