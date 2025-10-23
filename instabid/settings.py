@@ -83,13 +83,12 @@ TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
 STATIC_URL = '/static/'
-# ✅ FIXED
-STATICFILES_DIRS = []
-# or simply remove the line entirely
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # render ke liye zaroori
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # agar project-level static folder hai
+]
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files (for profile pictures)
 MEDIA_URL = '/media/'
