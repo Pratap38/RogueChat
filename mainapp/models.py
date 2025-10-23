@@ -1,8 +1,8 @@
 from django.db import models
+from django.contrib.auth.models import User
 
-# 🚀 Message model
 class Message(models.Model):
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -10,16 +10,12 @@ class Message(models.Model):
         ordering = ['timestamp']
 
     def __str__(self):
-        try:
-            username = self.user.username
-        except:
-            username = "Anonymous"
+        username = self.user.username if self.user else "Anonymous"
         return f"{username}: {self.content[:30]}"
 
 
-# 🚀 Post model
 class Post(models.Model):
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='posts/', blank=True, null=True)
     video = models.FileField(upload_to='posts/videos/', blank=True, null=True)
     description = models.TextField(blank=True, null=True)
@@ -29,17 +25,12 @@ class Post(models.Model):
         ordering = ['-timestamp']
 
     def __str__(self):
-        try:
-            username = self.user.username
-        except:
-            username = "Anonymous"
-        return f"{username}'s Post"
+        return f"{self.user.username}'s Post" if self.user else "Anonymous Post"
 
 
-# 🚀 Comment model
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -47,16 +38,11 @@ class Comment(models.Model):
         ordering = ['timestamp']
 
     def __str__(self):
-        try:
-            username = self.user.username
-        except:
-            username = "Anonymous"
-        return f"{username} Comment"
+        return f"{self.user.username} Comment" if self.user else "Anonymous Comment"
 
 
-# 🚀 Profile model
 class Profile(models.Model):
-    user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=15)
     email = models.EmailField(blank=True, null=True)
