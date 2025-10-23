@@ -1,5 +1,6 @@
 from django.db import models
 
+# 🚀 Message model
 class Message(models.Model):
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
     content = models.TextField()
@@ -9,9 +10,14 @@ class Message(models.Model):
         ordering = ['timestamp']
 
     def __str__(self):
-        return f"{self.user.username if self.user else 'Anonymous'}: {self.content[:30]}"
+        try:
+            username = self.user.username
+        except:
+            username = "Anonymous"
+        return f"{username}: {self.content[:30]}"
 
 
+# 🚀 Post model
 class Post(models.Model):
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='posts/', blank=True, null=True)
@@ -23,9 +29,14 @@ class Post(models.Model):
         ordering = ['-timestamp']
 
     def __str__(self):
-        return f"{self.user.username}'s Post"
+        try:
+            username = self.user.username
+        except:
+            username = "Anonymous"
+        return f"{username}'s Post"
 
 
+# 🚀 Comment model
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
@@ -36,9 +47,14 @@ class Comment(models.Model):
         ordering = ['timestamp']
 
     def __str__(self):
-        return f"{self.user.username} Comment"
+        try:
+            username = self.user.username
+        except:
+            username = "Anonymous"
+        return f"{username} Comment"
 
 
+# 🚀 Profile model
 class Profile(models.Model):
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
     full_name = models.CharField(max_length=100)
