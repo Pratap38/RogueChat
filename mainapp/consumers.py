@@ -1,9 +1,8 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
-from django.contrib.auth.models import User
-from .models import Message
 
+from .models import Message  # models import safe at top-level
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -50,6 +49,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @sync_to_async
     def save_message(self, username, message):
-        """Save message to the database"""
+        """Save message to the database safely"""
+        # Import User here to avoid AppRegistryNotReady error
+        from django.contrib.auth.models import User
         user, _ = User.objects.get_or_create(username=username)
         Message.objects.create(user=user, content=message)
