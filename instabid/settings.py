@@ -83,14 +83,18 @@ TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
 USE_TZ = True
 
+# Static files (CSS, JS, images)
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # render ke liye zaroori
+
+# Collectstatic ke liye folder
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# App-level static files automatically collect honge
 STATICFILES_DIRS = [
-    BASE_DIR / "static",  # agar project-level static folder hai
+    BASE_DIR / 'mainapp' / 'static',  # ✅ app-level static
 ]
 
-
-# Media files (for profile pictures)
+# Media files (uploaded images, videos)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
