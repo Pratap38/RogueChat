@@ -50,6 +50,7 @@ TEMPLATES = [
 ]
 
 # Channels ASGI setup
+# Channels setup
 ASGI_APPLICATION = 'instabid.asgi.application'
 WSGI_APPLICATION = 'instabid.wsgi.application'
 
